@@ -1,0 +1,7 @@
+Command:
+python -m pytest -q --basetemp=./.pytest_tmp
+
+Result:
+22 passed, 2 warnings in 3.50s
+
+The warnings are FastAPI deprecation warnings for the on_event startup API.

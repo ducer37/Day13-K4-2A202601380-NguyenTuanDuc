@@ -9,15 +9,27 @@
 
 ## 2. Kết quả kỹ thuật
 
-- Điểm `validate_logs.py`:
+- Điểm `validate_logs.py`: Checkpoint 0 baseline **30/100**; sau Checkpoint 1 **100/100**.
 - Tổng số traces:
-- Số PII leak còn lại:
-- Link/đường dẫn dashboard:
+- Số PII leak còn lại: **0**.
+- Link/đường dẫn dashboard: Contract tại [config/dashboard.yaml](../config/dashboard.yaml); screenshot dashboard runtime sẽ bổ sung ở Checkpoint 2.
+
+Evidence Checkpoint 0:
+
+- [Health check](evidence/checkpoint0_health.txt)
+- [Load test](evidence/checkpoint0_load_test.txt)
+- [Pytest](evidence/checkpoint0_pytest.txt)
+- [Baseline validate logs](evidence/checkpoint0_validate_logs_baseline.txt)
+- [Dashboard contract validator](evidence/checkpoint0_validate_dashboard.txt)
+
+Evidence Checkpoint 1:
+
+- [Final validate logs](evidence/checkpoint1_validate_logs_final.txt)
 
 ## 3. Logging và tracing
 
-- Evidence correlation ID:
-- Evidence PII redaction:
+- Evidence correlation ID: [checkpoint1_correlation_metadata.jsonl](evidence/checkpoint1_correlation_metadata.jsonl)
+- Evidence PII redaction: [checkpoint1_pii_redaction.jsonl](evidence/checkpoint1_pii_redaction.jsonl)
 - Evidence trace waterfall:
 - Giải thích một span đáng chú ý:
 
@@ -31,8 +43,8 @@
 
 ## 5. Dashboard, SLO và alerts
 
-- Kết quả `validate_dashboard.py`:
-- Evidence dashboard:
+- Kết quả `validate_dashboard.py`: **HỢP LỆ: 6/6 panel**.
+- Evidence dashboard: [Dashboard contract validator](evidence/checkpoint0_validate_dashboard.txt); screenshot runtime sẽ bổ sung ở Checkpoint 2.
 - SLO đã chọn và lý do:
 - Alert rules và runbook:
 

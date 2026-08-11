@@ -1,0 +1,7 @@
+Command:
+python scripts/validate_dashboard.py
+
+Result:
+HỢP LỆ: 6/6 panel có trong dashboard contract.
+
+This validates the dashboard contract only; a runtime dashboard screenshot is still required later.

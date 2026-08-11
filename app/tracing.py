@@ -3,14 +3,20 @@ from __future__ import annotations
 import os
 from typing import Any
 
+# Load env vars BEFORE importing Langfuse — importing too early means
+# Langfuse initialises with missing credentials (see instrumentation best practices).
+from dotenv import load_dotenv
+
+load_dotenv()
+
 try:
-    from langfuse import get_client, observe
+    from langfuse import Langfuse, get_client, observe
 
     LANGFUSE_SDK_AVAILABLE = True
-except ImportError:  # pragma: no cover - chỉ dùng khi chưa cài requirements
+except ImportError:  # pragma: no cover - only when requirements not installed
     LANGFUSE_SDK_AVAILABLE = False
 
-    def observe(*args: Any, **kwargs: Any):
+    def observe(*args: Any, **kwargs: Any):  # type: ignore[misc]
         def decorator(func):
             return func
 
@@ -29,12 +35,14 @@ except ImportError:  # pragma: no cover - chỉ dùng khi chưa cài requirement
         def flush(self) -> None:
             return None
 
-    def get_client():
+    def get_client():  # type: ignore[misc]
         return _DummyClient()
 
 
 def get_langfuse_client():
+    """Return the Langfuse client (or a no-op stub when SDK is unavailable)."""
     return get_client()
+
 
 def flush_langfuse() -> None:
     """Flush any buffered Langfuse events — call on shutdown or in scripts."""
@@ -43,6 +51,7 @@ def flush_langfuse() -> None:
 
 
 def tracing_enabled() -> bool:
+    """Return True only when SDK is installed AND credentials are configured."""
     return LANGFUSE_SDK_AVAILABLE and bool(
         os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY")
     )

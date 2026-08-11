@@ -50,6 +50,14 @@ def percentile(values: list[int], p: int) -> float:
 
 
 
+COST_SAVINGS: list[float] = []
+
+
+def record_cost_savings(saved_usd: float) -> None:
+    if saved_usd > 0:
+        COST_SAVINGS.append(saved_usd)
+
+
 def snapshot() -> dict:
     total_errors = sum(ERRORS.values())
     total_requests = TRAFFIC + total_errors
@@ -63,9 +71,10 @@ def snapshot() -> dict:
         "latency_history": list(HISTORY),
         "avg_cost_usd": round(mean(REQUEST_COSTS), 4) if REQUEST_COSTS else 0.0,
         "total_cost_usd": round(sum(REQUEST_COSTS), 4),
+        "total_cost_saved_usd": round(sum(COST_SAVINGS), 6),
         "tokens_in_total": sum(REQUEST_TOKENS_IN),
         "tokens_out_total": sum(REQUEST_TOKENS_OUT),
         "error_rate_pct": round(error_rate, 2),
         "error_breakdown": dict(ERRORS),
         "quality_avg": round(mean(QUALITY_SCORES), 4) if QUALITY_SCORES else 0.0,
-    }
+    }

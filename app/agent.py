@@ -4,6 +4,7 @@ import time
 from dataclasses import dataclass
 
 from . import metrics
+from .cost_optimization import optimize_context
 from .mock_llm import FakeLLM
 from .mock_rag import retrieve
 from .pii import hash_user_id, summarize_text
@@ -34,7 +35,9 @@ class LabAgent:
         started = time.perf_counter()
 
         # Retrieval step — nested under the generation as a retriever span
-        docs = self._retrieve(message)
+        raw_docs = self._retrieve(message)
+        docs, opt_metrics = optimize_context(raw_docs)
+        metrics.record_cost_savings(opt_metrics["cost_saved_usd"])
 
         langfuse_client = get_langfuse_client()
         prompt = resolve_prompt(
@@ -57,6 +60,7 @@ class LabAgent:
             "prompt_version": prompt.version,
             "prompt_source": prompt.source,
         }
+
         cid = get_contextvars().get("correlation_id")
         if cid:
             trace_meta["correlation_id"] = cid
@@ -80,7 +84,10 @@ class LabAgent:
                 "prompt_version": prompt.version,
                 "prompt_source": prompt.source,
                 "prompt_fetch_error": prompt.fetch_error,
+                "cost_saved_usd": opt_metrics["cost_saved_usd"],
+                "cost_reduction_pct": opt_metrics["reduction_pct"],
             },
+
             usage_details={
                 "prompt_tokens": response.usage.input_tokens,
                 "completion_tokens": response.usage.output_tokens,

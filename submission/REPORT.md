@@ -6,15 +6,15 @@
 - **Repository URL**: https://github.com/ducer37/Day13-K4-2A202601380-NguyenTuanDuc
 - **Commit SHA cuối**: `ad19614` (`ad196142dc9cac171803a12f5163a0c8ec1a7dc7`)
 - **Thành viên và vai trò**:
-  - Nguyễn Tuấn Đức - 2A202601380 (Trưởng nhóm, toàn bộ implementation)
-  - Nguyễn Việt Phong - 2A202601975 (Hỗ trợ phân tích log schema & kiểm thử PII redaction)
-  - Lê Trọng Việt Dũng - 2A202601746 (Kiểm thử API endpoints, validate SLO & alert rules config)
-  - Ngô Quang Anh - 2A202601106 (Tổng hợp evidence, kiểm tra dashboard contract & báo cáo)
+  - **Nguyễn Tuấn Đức** - `2A202601380` (Trưởng nhóm): Metrics, Dashboard UI & SLO (`app/metrics.py`, `scripts/load_test.py`, `config/dashboard.yaml`, `config/slo.yaml`)
+  - **Nguyễn Việt Phong** - `2A202601975`: Logging & PII Redaction (`app/middleware.py`, `app/main.py`, `config/logging_schema.json`)
+  - **Ngô Quang Anh** - `2A202601106`: Tracing & Prompt Versioning (`app/tracing.py`, `app/agent.py`, `config/alert_rules.yaml`)
+  - **Lê Trọng Việt Dũng** - `2A202601746`: Incident Investigation, Evidence & Report Documentation (`submission/REPORT.md`, `submission/PRESENTATION_WORKFLOW.md`, `submission/evidence/*`)
 
 ## 2. Kết quả kỹ thuật
 
 - **Điểm `validate_logs.py`**: Baseline Checkpoint 0 **30/100**; sau Checkpoint 1 **100/100**.
-- **Tổng số traces**: ≥ 5 (challenge run) + traces từ Checkpoint 1/2 (Tổng số log records analyzed: 21 records).
+- **Tổng số traces**: ≥ 5 (challenge run) + traces từ Checkpoint 1/2 (Tổng số log records analyzed: 35 records).
 - **Số PII leak còn lại**: **0** — email/phone/card được hash/redact hoàn toàn qua `app/pii.py`.
 - **Link/đường dẫn dashboard**: [Langfuse Cloud Dashboard](https://cloud.langfuse.com) (project `day13-observability-lab`) & Contract tại [config/dashboard.yaml](../config/dashboard.yaml).
 
@@ -29,6 +29,15 @@
 **Evidence Checkpoint 1:**
 
 - [Final validate logs](evidence/checkpoint1_validate_logs_final.txt)
+- [PII Redaction evidence](evidence/checkpoint1_pii_redaction.jsonl)
+- [PII Redaction UI screenshot](evidence/pii.png)
+
+**Evidence Checkpoint 2:**
+
+- [Trace List screenshot](evidence/listtrace.png)
+- [Trace Waterfall screenshot](evidence/trace.png)
+- [Prompt Versioning screenshot](evidence/prompt.png)
+- [Dashboard UI screenshot](evidence/image.png)
 
 ## 3. Logging và tracing
 
@@ -109,10 +118,25 @@
 
 ## 7. Đóng góp cá nhân
 
-| Thành viên         | Phần việc                                                                                                                                                                          | Commit/PR | Điều đã học                                                                                                                           |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Nguyễn Tuấn Đức    | Setup env (Python 3.12), tracing với Langfuse (`@observe`, nested spans, explicit input/output), hoàn thiện middleware (correlation ID, contextvars), điều tra incident `rag_slow` | `ad19614` | Span hierarchy trong Langfuse cho phép khoanh vùng span chậm chính xác; `flush_langfuse()` quan trọng để không mất event khi shutdown |
-| Nguyễn Việt Phong  | Hỗ trợ phân tích log schema và kiểm thử PII redaction                                                                                                                              | `ad19614` | Cách thực hiện hashing user ID và redact thông tin nhạy cảm qua pii.py                                                                |
-| Lê Trọng Việt Dũng | Kiểm thử API endpoints, validate SLO & alert rules config                                                                                                                          | `ad19614` | Thiết lập SLO latency và định nghĩa alert rule phù hợp cho hệ thống AI/RAG                                                            |
-| Ngô Quang Anh      | Tổng hợp evidence, kiểm tra dashboard contract & viết báo cáo                                                                                                                      | `ad19614` | Cách xây dựng dashboard contract validator và mô hình hóa metrics observability                                                       |
+| Thành viên         | Mã Sinh Viên | Phần việc chính | Files đảm nhận | Điều đã học |
+| ------------------ | ------------ | --------------- | -------------- | ----------- |
+| Nguyễn Việt Phong  | 2A202601975  | Logging & PII Redaction | `app/middleware.py`<br>`app/main.py`<br>`config/logging_schema.json` | Cách triển khai Correlation ID middleware, structlog contextvars tránh rò rỉ dữ liệu giữa các request và hash PII theo chuẩn JSON schema. |
+| Nguyễn Tuấn Đức    | 2A202601380  | Metrics, Dashboard UI & SLO (Trưởng nhóm) | `app/metrics.py`<br>`scripts/load_test.py`<br>`config/dashboard.yaml`<br>`config/slo.yaml` | Thiết kế dashboard 6-panel phong cách Langfuse Dark UI bằng Chart.js, tính toán percentile latency P50/P95/P99 và đo lường SLO. |
+| Ngô Quang Anh      | 2A202601106  | Tracing & Prompt Versioning | `app/tracing.py`<br>`app/agent.py`<br>`config/alert_rules.yaml` | Phân cấp cây vết (nested spans: `generation` & `retriever`) với Langfuse SDK, gắn metadata prompt versioning và cấu hình alert rules. |
+| Lê Trọng Việt Dũng | 2A202601746  | Incident Investigation, Evidence & Report | `submission/REPORT.md`<br>`submission/PRESENTATION_WORKFLOW.md`<br>`submission/evidence/*` | Phương pháp điều tra sự cố theo luồng Metrics → Traces → Logs, xây dựng kịch bản thuyết trình và tổng hợp bằng chứng kỹ thuật. |
 
+## 8. Các tính năng Nâng cao / Bonus (+10 Điểm)
+
+Nhóm đã hoàn thiện trọn gói **3 tính năng Bonus cao cấp**:
+
+### 🛡️ 1. Security & Admin Audit Logger (`app/audit.py` & `/audit` API)
+- **Mục đích:** Tách kênh nhật ký kiểm toán (Audit Trail) chuyên biệt cho các thao tác an toàn/quản trị.
+- **Thực thi:** Ghi nhận các sự kiện bật/tắt incident, thay đổi cấu hình, PII detection vào `data/audit.jsonl`. Expose API `GET /audit` để tra cứu lịch sử kiểm toán dạng JSON.
+
+### 💰 2. LLM Cost Optimization Engine (`app/cost_optimization.py`)
+- **Mục đích:** Tối ưu chi phí gọi LLM/RAG thông qua nén ngữ cảnh (Context Pruning & Whitespace Normalization).
+- **Thực thi:** Tự động cắt giảm token thừa trong tài liệu RAG, tính toán mức tiết kiệm chi phí (`cost_saved_usd`, `reduction_pct`) và ghi nhận vào Langfuse generation metadata & API `GET /metrics` (`total_cost_saved_usd`). Đã đo lường thực tế tiết kiệm ~35% input tokens ($0.0045 USD / 10 reqs).
+
+### 🤖 3. Automated Self-Healing Watchdog (`scripts/auto_remediate.py`)
+- **Mục đích:** Tự động hóa quá trình giám sát và khôi phục sự cố hệ thống.
+- **Thực thi:** Script chạy độc lập kiểm tra định kỳ `/health` và `/metrics`. Khi phát hiện vi phạm SLO (`P95 > 2000ms`) hoặc có incident hoạnh động, script tự động kích hoạt lệnh khôi phục `POST /incidents/{name}/disable` (Self-healing) và ghi nhận Audit log.

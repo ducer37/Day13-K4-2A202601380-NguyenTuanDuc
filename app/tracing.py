@@ -36,6 +36,11 @@ except ImportError:  # pragma: no cover - chỉ dùng khi chưa cài requirement
 def get_langfuse_client():
     return get_client()
 
+def flush_langfuse() -> None:
+    """Flush any buffered Langfuse events — call on shutdown or in scripts."""
+    if LANGFUSE_SDK_AVAILABLE:
+        get_client().flush()
+
 
 def tracing_enabled() -> bool:
     return LANGFUSE_SDK_AVAILABLE and bool(

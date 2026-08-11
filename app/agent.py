@@ -26,10 +26,16 @@ class LabAgent:
         self.model = model
         self.llm = FakeLLM(model=model)
 
-    @observe(as_type="generation", capture_input=False, capture_output=False)
+    # capture_input=False so we control exactly what goes into the trace input
+    # (we use update_current_generation(input=...) to set only the user message).
+    # capture_output=False likewise — we set it explicitly below.
+    @observe(name="chat-response", as_type="generation", capture_input=False, capture_output=False)
     def run(self, user_id: str, feature: str, session_id: str, message: str) -> AgentResult:
         started = time.perf_counter()
-        docs = retrieve(message)
+
+        # Retrieval step — nested under the generation as a retriever span
+        docs = self._retrieve(message)
+
         langfuse_client = get_langfuse_client()
         prompt = resolve_prompt(
             langfuse_client,
@@ -59,18 +65,16 @@ class LabAgent:
             user_id=hash_user_id(user_id),
             session_id=session_id,
             tags=["lab", feature, self.model],
-            metadata={
-                "prompt_name": prompt.name,
-                "prompt_label": prompt.label,
-                "prompt_version": prompt.version,
-                "prompt_source": prompt.source,
-            },
+            metadata=trace_meta,
         )
+        # Set generation-level attributes: explicit input (only user message, not all
+        # function args), output, model, token usage, and cost.
         langfuse_client.update_current_generation(
+            input=summarize_text(message),   # explicit safe input — no PII args exposed
+            output=response.text,
             model=self.model,
             metadata={
                 "doc_count": len(docs),
-                "query_preview": summarize_text(message),
                 "prompt_name": prompt.name,
                 "prompt_label": prompt.label,
                 "prompt_version": prompt.version,
@@ -101,6 +105,12 @@ class LabAgent:
             cost_usd=cost_usd,
             quality_score=quality_score,
         )
+
+    @observe(name="rag-retrieval", as_type="retriever")
+    def _retrieve(self, query: str) -> list[str]:
+        """Retrieve relevant documents. Traced as a 'retriever' span nested under
+        the parent generation so Langfuse shows the span hierarchy correctly."""
+        return retrieve(query)
 
     def _estimate_cost(self, tokens_in: int, tokens_out: int) -> float:
         input_cost = (tokens_in / 1_000_000) * 3
